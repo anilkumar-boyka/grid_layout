@@ -1,5 +1,6 @@
 <template>
-  <div class="hello"> <span v-on:click="saveData()">save data</span>
+  <div class="hello">
+     <!-- <span v-on:click="saveData()">save data</span> -->
     <div :class={edit:edit} v-on:click="edit_mode()">switch to Edit mode</div>
     <span :class={defaultMode:defaultMode} v-on:click="default_mode()">switch to Default</span>
     <span :class={new_component:new_component} v-on:click="new_component_add()">Add New Grid Component</span>
@@ -7,6 +8,10 @@
       Enter Width : <input v-model="width" placeholder ="Enter Width">
       <button v-on:click="new_component_added()"> Add</button> 
       <button v-on:click="cancel"> Cancel</button>
+      <span v-if=background_color_info>Select Background Color
+        <span v-on:click="black_bg" class="black"><span v-if="white_tick" class="white-tick">&#10003;</span></span>
+        <span v-on:click="white_bg" class="white" style="color:black"><span v-if="black_tick" class="black-tick">&#10003;</span></span>
+      </span>
     </div>
      <grid-layout
             :layout.sync="layout"
@@ -20,10 +25,11 @@
             :use-css-transforms="true"
             :static="true"
             :maxW="10"
+            :prevent-collision="true"
             
     >
- 
-        <grid-item class="yo" v-for="item in layout"
+        <span v-on:click="grid_click($event)">
+        <grid-item :class={bg_color_black:bg_color_b,bg_color_white:bg_color_w} v-for="item in layout"
                    :x="item.x"
                    :y="item.y"
                    :w="item.w"
@@ -31,8 +37,11 @@
                    :i="item.i"
                    :key="item.i"
                    @resized="resizedEvent">
-            {{item.i}}
-        </grid-item>
+            <span style="color:#888888">{{item.i}}</span>
+            <div class="popup" v-on:click="myFunction()">
+              <span class="popuptext" id="myPopup">Delete selected Grid</span>
+            </div>
+        </grid-item></span>
     </grid-layout>
   </div>
 </template>
@@ -62,39 +71,27 @@ export default {
       x : '',
       height : null,
       width : null,
-      identifier: 19,
+      x_coordinate : 0,
+      y_coordinate : 0,
+      identifier: 0,
       size : 1,
-      my_data :"Learning how to write in a file." ,
+      my_data :{name:"Anil",age : 23},
+      background_color_info : 0,
+      black_tick : 0,
+      white_tick : 0,
+      bg_color_b : 0,
+      bg_color_w : 0,
       layout : [
-        {"x":0,"y":0,"w":1,"h":2,"i":"0"},
-        {"x":2,"y":0,"w":2,"h":4,"i":"1"},
-        {"x":4,"y":0,"w":2,"h":5,"i":"2"},
-        {"x":6,"y":0,"w":2,"h":3,"i":"3"},
-        {"x":8,"y":0,"w":2,"h":3,"i":"4"},
-        {"x":10,"y":0,"w":2,"h":3,"i":"5"},
-        {"x":0,"y":5,"w":2,"h":5,"i":"6"},
-        {"x":2,"y":5,"w":2,"h":5,"i":"7"},
-        {"x":4,"y":5,"w":2,"h":5,"i":"8"},
-        {"x":6,"y":3,"w":2,"h":4,"i":"9"},
-        {"x":8,"y":4,"w":2,"h":4,"i":"10"},
-        {"x":10,"y":4,"w":2,"h":4,"i":"11"},
-        {"x":0,"y":10,"w":2,"h":5,"i":"12"},
-        {"x":2,"y":10,"w":2,"h":5,"i":"13"},
-        {"x":4,"y":8,"w":2,"h":4,"i":"14"},
-        {"x":6,"y":8,"w":2,"h":4,"i":"15"},
-        {"x":8,"y":10,"w":2,"h":5,"i":"16"},
-        {"x":10,"y":4,"w":2,"h":2,"i":"17"},
-        {"x":0,"y":9,"w":2,"h":3,"i":"18"},
-        {"x":2,"y":6,"w":2,"h":2,"i":"19"}
+
       ]
     }
   },
   mounted(){
     //  var vm=this;
       // vm.w_value = 5;
-      console.log(this.w_value)
-      console.log(this.layout[0].w);
-      this.layout[0].w = this.new_values[0];
+      // console.log(this.w_value)
+      // console.log(this.layout[0].w);
+      // this.layout[0].w = this.new_values[0];
   },
   methods : {
     edit_mode : function () {
@@ -122,53 +119,89 @@ export default {
     new_component_add : function () {
     console.log('yo')
       this.size = !this.size;
+      this.background_color_info = !this.background_color_info;
     },
     new_component_added: function () {
-    console.log('yo')
+       if(this.height && this.bg_color_b || this.bg_color_w ){
        this.identifier++;
        this.width = parseInt(this.width, 10);
        this.height = parseInt(this.height, 10);
-       this.x={"x":0,"y":0,"w":this.width,"h":this.height,"i":this.identifier}
+       this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier}
        this.layout.push(this.x);
        this.height ='';
        this.width = '';
+       }
+       else {
+         alert('Set Height,Width and Background Color')
+       }
+       if(this.x_coordinate/5>0 && this.x_coordinate%5==0)
+          {
+            this.y_coordinate = this.y_coordinate+3;
+            this.x_coordinate = 0;
+          }
+          else{
+              //  alert('hello')
+               this.x_coordinate = this.x_coordinate+2;
+          }
+          // this.x_coordinate = this.x_coordinate+2;
+       
     },
     cancel : function () {
       this.size = !this.size;
       this.height ='';
       this.width = '';
+      this.background_color_info = !this.background_color_info;
+    },
+    black_bg :function () {
+     if(!this.black_tick && !this.white_tick){
+       this.white_tick = !this.white_tick;
+     }
+    //  else if(!this.black_tick && this.white_tick) {
+    //    this.black_tick = !this.black_tick;
+    //    this.white_tick = !this.white_tick;
+    //  }
+     else if(this.black_tick && !this.white_tick){
+       this.black_tick = !this.black_tick;
+       this.white_tick = !this.white_tick;
+     } 
+     console.log('white tick'+this.white_tick)
+       console.log('black tick'+this.black_tick)
+       console.log('next')
+       if(this.bg_color_w)
+       this.bg_color_w = !this.bg_color_w;
+       this.bg_color_b = this.white_tick;
+       
+     
+    },
+    white_bg :function () {
+      if(!this.black_tick && !this.white_tick){
+       this.black_tick = !this.black_tick;
+     }
+     else if(!this.black_tick && this.white_tick) {
+       this.black_tick = !this.black_tick;
+       this.white_tick = !this.white_tick;
+     }
+       console.log('white tick'+this.white_tick)
+       console.log('black tick'+this.black_tick)
+       
+       this.bg_color_w = this.black_tick;
+    },
+    grid_click : function (input) {
+         console.log(input.target.innerText)
+         var popup = document.getElementById("myPopup");
+        popup.classList.toggle("show");
     },
     saveData : function () {
-       alert('yo')
-      //  var blob = new Blob([{"name ":"save Grid Layout data here 123456"}],
-      //           { type: "text/plain;charset=utf-8" });
-      //           saveAs(blob, "data.json");
               
-        //        const data = JSON.stringify(this.arr)
-        // window.localStorage.setItem('arr', data);
-        // console.log(JSON.parse(window.localStorage.getItem('arr')))
-        var jsonData = '{"persons":[{"name":"John","city":"New York"},{"name":"Phil","city":"Ohio"}]}';
-        var jsonObj = JSON.parse(jsonData);
-        console.log(jsonObj);
-        var jsonContent = JSON.stringify(jsonObj);
-        console.log(jsonContent);
-         const users = require("./data.json");
-         const users2 = require("./newData.json");
-        console.log(users) 
-        
-        name = JSON.stringify(name);
-        console.log(users2)          
-        fs.writeFile("./output.json",jsonContent, 'utf8',(err) => {
-                if(err)
-                console.log(err) 
-                else
-               { 
-                //  console.log(data)
-                 console.log('data written successfull')
-               }
-        }) 
+        //        const data = JSON.stringify(this.my_data)
+        // window.localStorage.setItem('my_data', data);
+        console.log(JSON.parse(window.localStorage.getItem('my_data')))
 
-    }
+    },
+    // myFunction : function () {
+    //   var popup = document.getElementById("myPopup");
+    //     popup.classList.toggle("show");
+    // }
   }
 }
 </script>
@@ -176,7 +209,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .hello {
-  background-color: black;
+  background-color: #888888;
 }
 .yo {
   background-color: white;
@@ -206,5 +239,78 @@ input {
 button {
   margin-left: 10px;
   color: grey;
+}
+.black {
+  height: 20px;
+  width : 20px;
+  display: inline-block;
+  background-color: black;
+}
+.white {
+  height: 20px;
+  width : 20px;
+  display: inline-block;
+  background-color: white;
+}
+.bg_color_black {
+  background-color: black;
+}
+.bg_color_white {
+  background-color: white;
+}
+.popup {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* The actual popup */
+.popup .popuptext {
+  visibility: hidden;
+  width: 160px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -80px;
+}
+
+/* Popup arrow */
+.popup .popuptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Toggle this class - hide and show the popup */
+.popup .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+  from {opacity: 0;} 
+  to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity:1 ;}
 }
 </style>
