@@ -39,51 +39,24 @@
      </div> 
       
     </div>
-     <grid-layout
-            :layout.sync="layout"
-            :col-num="12"
-            :row-height="30"
-            :is-draggable="true"
-            :is-resizable="true"
-            :is-mirrored="false"
-            :vertical-compact="true"
-            :margin="[10, 10]"
-            :use-css-transforms="true"
-            :static="true"
-            :maxW="10"
-
-            
-    >
-        <span v-on:click="grid_click($event)">
-        <grid-item :class={bg_color_black:bg_color_b,bg_color_white:bg_color_w} v-for="item in layout"
-                   :x="item.x"
-                   :y="item.y"
-                   :w="item.w"
-                   :h="item.h"
-                   :i="item.i"
-                   :key="item.i"
-                   @resized="resizedEvent">
-            <span style="color:#888888">{{item.i}}</span>
-            <span class="popup">
-              <span class="popuptext" id="myPopup">Delete selected Grid</span>
-            </span>
-        </grid-item></span>
-    </grid-layout>
+    <Black :grid_data=black_data></Black>
+    <!-- <White :layout_data=white_data></White> -->
+     
   </div>
 </template>
 
 <script>
 import VueGridLayout from 'vue-grid-layout'
-import { saveAs } from 'file-saver';  
-import fs from 'browserify-fs';
-// const writeJsonFile = require('write-json-file');
-// import {write} from 'write-json-file'
+import Black from '@/components/Black.vue'
+import White from '@/components/White.vue'
 export default {
   name: 'HelloWorld',
   components: {
             // ResponsiveGridLayout,
             GridLayout:VueGridLayout.GridLayout,
-            GridItem: VueGridLayout.GridItem
+            GridItem: VueGridLayout.GridItem,
+            Black : Black,
+            White : White
         },
   data () {
     return {
@@ -107,6 +80,8 @@ export default {
       white_tick : 0,
       bg_color_b : 0,
       bg_color_w : 0,
+      black_data :[],
+      white_data : [],
       layout : [
 
       ]
@@ -153,28 +128,52 @@ export default {
       this.background_color_info = !this.background_color_info;
     },
     new_component_added: function () {
-       if(this.height && this.bg_color_b || this.bg_color_w ){
-       this.identifier++;
-       this.width = parseInt(this.width, 10);
-       this.height = parseInt(this.height, 10);
-       this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier}
-       this.layout.push(this.x);
-       this.height ='';
-       this.width = '';
-       }
-       else {
-         alert('Set Height,Width and Background Color')
-       }
-       if(this.x_coordinate/5>0 && this.x_coordinate%5==0)
-          {
-            this.y_coordinate = this.y_coordinate+3;
-            this.x_coordinate = 0;
-          }
-          else{
-              //  alert('hello')
-               this.x_coordinate = this.x_coordinate+2;
-          }
-          // this.x_coordinate = this.x_coordinate+2;
+      //  if(this.height && this.bg_color_b || this.bg_color_w ){
+      //  this.identifier++;
+      //  this.width = parseInt(this.width, 10);
+      //  this.height = parseInt(this.height, 10);
+      //  this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier}
+      //  this.layout.push(this.x);
+      //  this.height ='';
+      //  this.width = '';
+      //  }
+      //  else {
+      //    alert('Set Height,Width and Background Color')
+      //  }
+      //  if(this.x_coordinate/5>0 && this.x_coordinate%5==0)
+      //     {
+      //       this.y_coordinate = this.y_coordinate+3;
+      //       this.x_coordinate = 0;
+      //     }
+      //     else{
+              
+      //          this.x_coordinate = this.x_coordinate+2;
+      //     }
+         if((this.height && this.width ) &&(this.bg_color_b || this.bg_color_w )){ 
+            this.identifier++;
+             this.width = parseInt(this.width, 10);
+             this.height = parseInt(this.height, 10);
+            if(this.white_tick == true) {
+              console.log(typeof(this.height))
+              this.black_data.push({"x":0,"y":0,"h":this.height,"w":this.width,"i":this.identifier});
+              this.height ='';
+              this.width = '';
+            }
+            else if(this.black_tick == true)
+            {
+            console.log('selected color is white')
+            this.white_data.push({"x":0,"y":0,"h":this.height,"w":this.width,"i":this.identifier})
+            this.height ='';
+            this.width = '';
+            }
+         }
+         else {
+           alert("Set Height,Width and Background Color")
+         }
+       
+     
+      
+      
        
     },
     cancel : function () {
@@ -201,8 +200,8 @@ export default {
        if(this.bg_color_w)
        this.bg_color_w = !this.bg_color_w;
        this.bg_color_b = this.white_tick;
-       
-     
+
+      
     },
     white_bg :function () {
       if(!this.black_tick && !this.white_tick){
@@ -216,6 +215,12 @@ export default {
        console.log('black tick'+this.black_tick)
        
        this.bg_color_w = this.black_tick;
+      //  if(this.white_tick == true) 
+      //     console.log('selected color is black')
+        
+      // else if(this.black_tick == true)
+      
+       
     },
     grid_click : function (input) {
          console.log(input.target.innerText)
@@ -233,6 +238,9 @@ export default {
     //   var popup = document.getElementById("myPopup");
     //     popup.classList.toggle("show");
     // }
+  },
+  yo : function () {
+    alert('hello')
   }
 }
 </script>
@@ -270,6 +278,7 @@ export default {
   display: inline-block;
   padding-bottom: 5px;
   font-weight: 900;
+  cursor: pointer;
 }
 .select_bg {
   font-weight: 700;

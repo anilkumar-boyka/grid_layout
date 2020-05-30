@@ -39,24 +39,54 @@
      </div> 
       
     </div>
-    <Black :grid_data=black_data></Black>
-    <White :layout_data=white_data></White>
-     
+     <grid-layout
+            :layout.sync="layout"
+            :col-num="12"
+            :row-height="30"
+            :is-draggable="true"
+            :is-resizable="true"
+            :is-mirrored="false"
+            :vertical-compact="true"
+            :margin="[10, 10]"
+            :use-css-transforms="true"
+            :static="true"
+            :maxW="10"
+
+            
+    >
+        <span v-on:click="grid_click($event)">
+        <grid-item v-for="item in layout"
+                   :x="item.x"
+                   :y="item.y"
+                   :w="item.w"
+                   :h="item.h"
+                   :i="item.i"
+                   :key="item.i"
+                   :style="{ 'background-color': item.color_code}"
+                   @resized="resizedEvent">
+            <div>
+              <span style="color:#888888">{{item.i}}</span>
+            </div>
+            <span class="popup">
+              <span class="popuptext" id="myPopup">Delete selected Grid</span>
+            </span>
+        </grid-item></span>
+    </grid-layout>{{layout}}
   </div>
 </template>
 
 <script>
 import VueGridLayout from 'vue-grid-layout'
-import Black from '@/components/Black.vue'
-import White from '@/components/White.vue'
+import { saveAs } from 'file-saver';  
+import fs from 'browserify-fs';
+// const writeJsonFile = require('write-json-file');
+// import {write} from 'write-json-file'
 export default {
   name: 'HelloWorld',
   components: {
             // ResponsiveGridLayout,
             GridLayout:VueGridLayout.GridLayout,
-            GridItem: VueGridLayout.GridItem,
-            Black : Black,
-            White : White
+            GridItem: VueGridLayout.GridItem
         },
   data () {
     return {
@@ -80,8 +110,10 @@ export default {
       white_tick : 0,
       bg_color_b : 0,
       bg_color_w : 0,
-      black_data :[],
-      white_data : [],
+      white: 0,
+      black : 0,
+      black_code: '#000000',
+      white_code : '#FFFFFF',
       layout : [
 
       ]
@@ -128,52 +160,43 @@ export default {
       this.background_color_info = !this.background_color_info;
     },
     new_component_added: function () {
-      //  if(this.height && this.bg_color_b || this.bg_color_w ){
-      //  this.identifier++;
-      //  this.width = parseInt(this.width, 10);
-      //  this.height = parseInt(this.height, 10);
-      //  this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier}
-      //  this.layout.push(this.x);
-      //  this.height ='';
-      //  this.width = '';
-      //  }
-      //  else {
-      //    alert('Set Height,Width and Background Color')
-      //  }
-      //  if(this.x_coordinate/5>0 && this.x_coordinate%5==0)
-      //     {
-      //       this.y_coordinate = this.y_coordinate+3;
-      //       this.x_coordinate = 0;
-      //     }
-      //     else{
+       if(this.height && this.bg_color_b || this.bg_color_w ){
+       this.identifier++;
+       this.width = parseInt(this.width, 10);
+       this.height = parseInt(this.height, 10);
+       if(this.bg_color_w)
+        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"color_code":this.white_code}
+       else
+        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"color_code":this.black_code}
+      this.layout.push(this.x);
+       this.height ='';
+       this.width = '';
+       }
+       else {
+         alert('Set Height,Width and Background Color')
+       }
+       if(this.x_coordinate/5>0 && this.x_coordinate%5==0)
+          {
+            this.y_coordinate = this.y_coordinate+3;
+            this.x_coordinate = 0;
+          }
+          else{
               
-      //          this.x_coordinate = this.x_coordinate+2;
-      //     }
-         if((this.height && this.width ) &&(this.bg_color_b || this.bg_color_w )){ 
-            this.identifier++;
-             this.width = parseInt(this.width, 10);
-             this.height = parseInt(this.height, 10);
-            if(this.white_tick == true) {
-              console.log(typeof(this.height))
-              this.black_data.push({"x":0,"y":0,"h":this.height,"w":this.width,"i":this.identifier});
-              this.height ='';
-              this.width = '';
-            }
-            else if(this.black_tick == true)
-            {
-            console.log('selected color is white')
-            this.white_data.push({"x":0,"y":0,"h":this.height,"w":this.width,"i":this.identifier})
-            this.height ='';
-            this.width = '';
-            }
-         }
-         else {
-           alert("Set Height,Width and Background Color")
-         }
-       
-     
-      
-      
+               this.x_coordinate = this.x_coordinate+2;
+          }
+          // this.x_coordinate = this.x_coordinate+2;
+          if(this.bg_color_w)
+         {
+           alert("black")
+           this.black=1;
+         this.white=0;
+         } 
+        else {
+          alert("white")
+          this.black = 0;
+        this.white = 1
+        }
+        
        
     },
     cancel : function () {
@@ -193,6 +216,8 @@ export default {
      else if(this.black_tick && !this.white_tick){
        this.black_tick = !this.black_tick;
        this.white_tick = !this.white_tick;
+
+       this.black_bg = !this.black_bg;
      } 
      console.log('white tick'+this.white_tick)
        console.log('black tick'+this.black_tick)
@@ -201,7 +226,11 @@ export default {
        this.bg_color_w = !this.bg_color_w;
        this.bg_color_b = this.white_tick;
 
-      
+      //  if(this.bg_color_w)
+      //  this.bg_color_b = !this.bg_color_w;
+        // this.black=1;
+        // this.white=0;
+     
     },
     white_bg :function () {
       if(!this.black_tick && !this.white_tick){
@@ -215,11 +244,15 @@ export default {
        console.log('black tick'+this.black_tick)
        
        this.bg_color_w = this.black_tick;
-      //  if(this.white_tick == true) 
-      //     console.log('selected color is black')
-        
-      // else if(this.black_tick == true)
-      
+
+      //  if(this.bg_color_b)
+      //  {   console.log("this.bg_color_b is"+this.bg_color_b)
+              
+      //     this.bg_color_w = !this.bg_color_b;
+      //     console.log("this.bg_color_w is"+this.bg_color_w) 
+      //  }
+        // this.black = 0;
+        // this.white = 1
        
     },
     grid_click : function (input) {
@@ -238,9 +271,6 @@ export default {
     //   var popup = document.getElementById("myPopup");
     //     popup.classList.toggle("show");
     // }
-  },
-  yo : function () {
-    alert('hello')
   }
 }
 </script>
@@ -278,7 +308,6 @@ export default {
   display: inline-block;
   padding-bottom: 5px;
   font-weight: 900;
-  cursor: pointer;
 }
 .select_bg {
   font-weight: 700;
@@ -310,9 +339,11 @@ button {
 }
 .bg_color_black {
   background-color: black;
+  height: 100%;
 }
 .bg_color_white {
   background-color: white;
+  height: 100%;
 }
 .form-control {
   font-size: 13px;
@@ -325,6 +356,14 @@ button {
 .input_values,label{
   margin-left: 3px;
 }
+/* .grid_background_color_white{
+  background-color: white;
+  height: 100%;
+}
+.grid_background_color_black{
+  background-color: black;
+  height: 100%;
+} */
 .popup {
   position: relative;
   display: inline-block;

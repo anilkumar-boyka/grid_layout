@@ -11,7 +11,8 @@
             :margin="[10, 10]"
             :use-css-transforms="true"
             :static="true"
-            :maxW="10">
+            :maxW="10"
+            @layout-mounted="layoutMountedEvent">
         <grid-item class="grid_bg" v-for ="item in layout_data"
             :x="item.x"
             :y="item.y"
@@ -19,7 +20,7 @@
             :h="item.h"
             :i="item.i"
             :key="item.i">
-            {{item.i}}        
+            <div><span>{{item.i}}</span></div>        
         </grid-item>
     </grid-layout>
     </div>
@@ -44,6 +45,11 @@ export default {
         console.log(this.layout_data);
         // this.layout.push(this.grid_data);
         // console.log(this.layout);
+    },
+    methods : {
+        layoutMountedEvent: function(newLayout){
+         console.log("Mounted layout: ", newLayout)
+        }
     }
 }
 </script>
