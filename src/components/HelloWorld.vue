@@ -43,8 +43,8 @@
             :layout.sync="layout"
             :col-num="12"
             :row-height="30"
-            :is-draggable="true"
-            :is-resizable="true"
+            :is-draggable="drag"
+            :is-resizable="resize"
             :is-mirrored="false"
             :vertical-compact="true"
             :margin="[10, 10]"
@@ -71,16 +71,12 @@
               <span class="popuptext" id="myPopup">Delete selected Grid</span>
             </span>
         </grid-item></span>
-    </grid-layout>{{layout}}
+    </grid-layout>
   </div>
 </template>
 
 <script>
 import VueGridLayout from 'vue-grid-layout'
-import { saveAs } from 'file-saver';  
-import fs from 'browserify-fs';
-// const writeJsonFile = require('write-json-file');
-// import {write} from 'write-json-file'
 export default {
   name: 'HelloWorld',
   components: {
@@ -108,10 +104,8 @@ export default {
       background_color_info : 0,
       black_tick : 0,
       white_tick : 0,
-      bg_color_b : 0,
-      bg_color_w : 0,
-      white: 0,
-      black : 0,
+      drag : false,
+      resize : false,
       black_code: '#000000',
       white_code : '#FFFFFF',
       layout : [
@@ -160,11 +154,11 @@ export default {
       this.background_color_info = !this.background_color_info;
     },
     new_component_added: function () {
-       if(this.height && this.bg_color_b || this.bg_color_w ){
+       if((this.height && this.width)&&(this.black_tick || this.white_tick )){
        this.identifier++;
        this.width = parseInt(this.width, 10);
        this.height = parseInt(this.height, 10);
-       if(this.bg_color_w)
+       if(this.black_tick)
         this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"color_code":this.white_code}
        else
         this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"color_code":this.black_code}
@@ -185,17 +179,6 @@ export default {
                this.x_coordinate = this.x_coordinate+2;
           }
           // this.x_coordinate = this.x_coordinate+2;
-          if(this.bg_color_w)
-         {
-           alert("black")
-           this.black=1;
-         this.white=0;
-         } 
-        else {
-          alert("white")
-          this.black = 0;
-        this.white = 1
-        }
         
        
     },
@@ -206,54 +189,14 @@ export default {
       this.background_color_info = !this.background_color_info;
     },
     black_bg :function () {
-     if(!this.black_tick && !this.white_tick){
-       this.white_tick = !this.white_tick;
-     }
-    //  else if(!this.black_tick && this.white_tick) {
-    //    this.black_tick = !this.black_tick;
-    //    this.white_tick = !this.white_tick;
-    //  }
-     else if(this.black_tick && !this.white_tick){
-       this.black_tick = !this.black_tick;
-       this.white_tick = !this.white_tick;
-
-       this.black_bg = !this.black_bg;
-     } 
-     console.log('white tick'+this.white_tick)
-       console.log('black tick'+this.black_tick)
-       console.log('next')
-       if(this.bg_color_w)
-       this.bg_color_w = !this.bg_color_w;
-       this.bg_color_b = this.white_tick;
-
-      //  if(this.bg_color_w)
-      //  this.bg_color_b = !this.bg_color_w;
-        // this.black=1;
-        // this.white=0;
+      this.white_tick = 1;
+      this.black_tick = 0; 
      
     },
     white_bg :function () {
-      if(!this.black_tick && !this.white_tick){
-       this.black_tick = !this.black_tick;
-     }
-     else if(!this.black_tick && this.white_tick) {
-       this.black_tick = !this.black_tick;
-       this.white_tick = !this.white_tick;
-     }
-       console.log('white tick'+this.white_tick)
-       console.log('black tick'+this.black_tick)
-       
-       this.bg_color_w = this.black_tick;
-
-      //  if(this.bg_color_b)
-      //  {   console.log("this.bg_color_b is"+this.bg_color_b)
-              
-      //     this.bg_color_w = !this.bg_color_b;
-      //     console.log("this.bg_color_w is"+this.bg_color_w) 
-      //  }
-        // this.black = 0;
-        // this.white = 1
-       
+      
+      this.black_tick = 1;
+      this.white_tick = 0;
     },
     grid_click : function (input) {
          console.log(input.target.innerText)
@@ -267,10 +210,7 @@ export default {
         console.log(JSON.parse(window.localStorage.getItem('my_data')))
 
     },
-    // myFunction : function () {
-    //   var popup = document.getElementById("myPopup");
-    //     popup.classList.toggle("show");
-    // }
+    
   }
 }
 </script>
@@ -308,6 +248,7 @@ export default {
   display: inline-block;
   padding-bottom: 5px;
   font-weight: 900;
+  cursor : pointer;
 }
 .select_bg {
   font-weight: 700;
@@ -337,14 +278,7 @@ button {
   display: inline-block;
   background-color: white;
 }
-.bg_color_black {
-  background-color: black;
-  height: 100%;
-}
-.bg_color_white {
-  background-color: white;
-  height: 100%;
-}
+
 .form-control {
   font-size: 13px;
   width : 100px;
@@ -356,14 +290,6 @@ button {
 .input_values,label{
   margin-left: 3px;
 }
-/* .grid_background_color_white{
-  background-color: white;
-  height: 100%;
-}
-.grid_background_color_black{
-  background-color: black;
-  height: 100%;
-} */
 .popup {
   position: relative;
   display: inline-block;
@@ -403,13 +329,13 @@ button {
 }
 
 /* Toggle this class - hide and show the popup */
-.popup .show {
+/* .popup .show {
   visibility: visible;
   -webkit-animation: fadeIn 1s;
   animation: fadeIn 1s;
 }
 
-/* Add animation (fade in the popup) */
+
 @-webkit-keyframes fadeIn {
   from {opacity: 0;} 
   to {opacity: 1;}
@@ -421,5 +347,5 @@ button {
 }
 .fa {
  
-}
+} */
 </style>
