@@ -62,14 +62,16 @@
                    :h="item.h"
                    :i="item.i"
                    :key="item.i"
-                   :style="{ 'background-color': item.color_code}"
+                   :selected_color="item.color_code"
                    @resized="resizedEvent">
-            <div>
-              <span style="color:#888888">{{item.i}}</span>
-            </div>
-            <span class="popup">
-              <span class="popuptext" id="myPopup">Delete selected Grid</span>
-            </span>
+                <span v-if=" item.color_code === '#FFFFFF'">
+                  <white :grid_no=item.i />
+                </span>
+                <span v-else>
+                  <black :grid_no=item.i />
+                  </span>
+              
+            
         </grid-item></span>
     </grid-layout>
   </div>
@@ -77,12 +79,16 @@
 
 <script>
 import VueGridLayout from 'vue-grid-layout'
+import White from '@/components/White'
+import Black from '@/components/Black'
 export default {
   name: 'HelloWorld',
   components: {
             // ResponsiveGridLayout,
             GridLayout:VueGridLayout.GridLayout,
-            GridItem: VueGridLayout.GridItem
+            GridItem: VueGridLayout.GridItem,
+            White : White,
+            Black : Black
         },
   data () {
     return {
@@ -149,7 +155,6 @@ export default {
         this.layout[0].w=this.new_values;
     },
     new_component_add : function () {
-    console.log('yo')
       this.size = !this.size;
       this.background_color_info = !this.background_color_info;
     },
@@ -207,7 +212,7 @@ export default {
               
         //        const data = JSON.stringify(this.my_data)
         // window.localStorage.setItem('my_data', data);
-        console.log(JSON.parse(window.localStorage.getItem('my_data')))
+        // console.log(JSON.parse(window.localStorage.getItem('my_data')))
 
     },
     
