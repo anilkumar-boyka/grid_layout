@@ -5,9 +5,24 @@
       <div class="to_default">
         <span :class={defaultMode:defaultMode} v-on:click="default_mode()"><b-badge class="badge" variant="dark">Switch to Default mode</b-badge></span>
         </div>
-      <span class="add">
-        <span :class={new_component:new_component} v-on:click="new_component_add()">Add New Grid Component</span>
-        </span> 
+       <b-container>
+         <b-row>
+           <b-col>
+              <span class="add">
+                <span :class={new_component:new_component} v-on:click="new_component_add()">
+                  Add New Grid Component
+                </span>
+              </span> 
+            </b-col>
+            <b-col>
+             <span v-if="delete_icon" v-on:click="delete_mode"><i class="fa fa-trash" aria-hidden="true"></i></span>
+            </b-col> 
+         </b-row>
+       </b-container> 
+      <div v-if="delete_info">
+          Click on a Grid You Want to delete. Note - You cannot Resize and Drag Grid Layouts. To Enable click 
+          <span class="cancel_delete" @click="cancel_delete">Cancel Delete</span>
+      </div>
       <div :class={size:size}>
         <hr style="background-color : white;">
         <b-container>
@@ -21,7 +36,7 @@
              </b-form>  
             </b-col>
             <b-col>
-              <span class="select_bg" v-if=background_color_info>Select Background Color:
+              <span class="select_bg">Select Background Color:
                 <span v-on:click="black_bg" class="black">
                   <span v-if="white_tick" class="white-tick">&#10003;</span>
                 </span>
@@ -43,8 +58,8 @@
             :layout.sync="layout"
             :col-num="12"
             :row-height="30"
-            :is-draggable="drag"
-            :is-resizable="resize"
+            :is-draggable=drag
+            :is-resizable=resize
             :is-mirrored="false"
             :vertical-compact="true"
             :margin="[10, 10]"
@@ -54,24 +69,17 @@
 
             
     >
-        <span v-on:click="grid_click($event)">
-        <grid-item v-for="item in layout"
+        <span class="delete_opeartion"  @click="delete_grid($event)">
+        <grid-item  v-for="item in layout"
                    :x="item.x"
                    :y="item.y"
                    :w="item.w"
                    :h="item.h"
                    :i="item.i"
                    :key="item.i"
-                   :selected_color="item.color_code"
                    @resized="resizedEvent">
-                <span v-if=" item.color_code === '#FFFFFF'">
-                  <white :grid_no=item.i />
-                </span>
-                <span v-else>
-                  <black :grid_no=item.i />
-                  </span>
-              
-            
+               <component :is="item.comp" :grid_no=item.i  />
+               
         </grid-item></span>
     </grid-layout>
   </div>
@@ -114,6 +122,10 @@ export default {
       resize : false,
       black_code: '#000000',
       white_code : '#FFFFFF',
+      delete_icon : 0,
+      delete_info : 0,
+      delete_operation : 0,
+      delete_message: '',
       layout : [
 
       ]
@@ -131,22 +143,23 @@ export default {
       alert('You Switched to edit Mode')
       this.drag = true;
       this.resize = true;
-      this.defaultMode = !this.defaultMode;
-      this.edit = !this.edit;
-      this.new_component = !this.new_component;
+      this.defaultMode = 0;
+      this.edit = 1;
+      this.new_component = 0;
+      this.delete_icon = 1;
     },
     default_mode : function () {
       alert('You Switched to Default')
       this.drag = false;
       this.resize = false;
-      this.defaultMode = !this.defaultMode;
-      this.edit = !this.edit;
-      this.new_component = !this.new_component;
-
-      this.size = !this.size;
+      this.defaultMode = 1;
+      this.edit = 0;
+      this.new_component = 1;
+      this.delete_icon = 0;
+      this.size = 1;
       this.height ='';
       this.width = '';
-      this.background_color_info = !this.background_color_info;
+      this.delete_info = 0;
     },
     resizedEvent: function(i, newH, newW, newHPx, newWPx){
         console.log("RESIZED i=" + i + ", H=" + newH + ", W=" + newW + ", H(px)=" + newHPx + ", W(px)=" + newWPx);
@@ -155,8 +168,11 @@ export default {
         this.layout[0].w=this.new_values;
     },
     new_component_add : function () {
-      this.size = !this.size;
+      this.size = 0;
       this.background_color_info = !this.background_color_info;
+      this.delete_info = 0;
+      this.drag = true;
+      this.resize = true;
     },
     new_component_added: function () {
        if((this.height && this.width)&&(this.black_tick || this.white_tick )){
@@ -164,9 +180,9 @@ export default {
        this.width = parseInt(this.width, 10);
        this.height = parseInt(this.height, 10);
        if(this.black_tick)
-        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"color_code":this.white_code}
+        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":White}
        else
-        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"color_code":this.black_code}
+        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":Black}
       this.layout.push(this.x);
        this.height ='';
        this.width = '';
@@ -183,8 +199,9 @@ export default {
               
                this.x_coordinate = this.x_coordinate+2;
           }
-          // this.x_coordinate = this.x_coordinate+2;
-        
+          this.white_tick = 0;
+          this.black_tick = 0;
+        console.log(this.layout)
        
     },
     cancel : function () {
@@ -203,10 +220,14 @@ export default {
       this.black_tick = 1;
       this.white_tick = 0;
     },
-    grid_click : function (input) {
-         console.log(input.target.innerText)
-         var popup = document.getElementById("myPopup");
-        popup.classList.toggle("show");
+    delete_mode  :function () {
+      this.size = 1;
+      this.delete_info = 1;
+      this.height ='';
+      this.width = '';
+      this.drag = false;
+      this.resize = false;
+      this.delete_operation = 1;
     },
     saveData : function () {
               
@@ -215,6 +236,18 @@ export default {
         // console.log(JSON.parse(window.localStorage.getItem('my_data')))
 
     },
+    delete_grid : function (input) {
+      console.log(input)
+      console.log(input.target.innerText)
+      alert('this grid is getting deleted')
+      this.layout.splice(input.target.innerText-1,1);
+     
+    },
+    cancel_delete : function () {
+      this.delete_info = 0;
+      this.drag = true;
+      this.resize = true;
+    }
     
   }
 }
@@ -295,62 +328,18 @@ button {
 .input_values,label{
   margin-left: 3px;
 }
-.popup {
-  position: relative;
-  display: inline-block;
+.fa-trash {
+  color : #f0f0f0;
+  font-size: 40px;
   cursor: pointer;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
 }
-
-/* The actual popup */
-.popup .popuptext {
-  visibility: hidden;
-  width: 160px;
-  background-color: #555;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 8px 0;
-  position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  margin-left: -80px;
+.cancel_delete {
+  cursor: pointer;
+  background-color: #d9455f;
 }
-
-/* Popup arrow */
-.popup .popuptext::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #555 transparent transparent transparent;
+.delete_operation {
+  display: inline-block;
+  height: 100%;
+  width : 100%;
 }
-
-/* Toggle this class - hide and show the popup */
-/* .popup .show {
-  visibility: visible;
-  -webkit-animation: fadeIn 1s;
-  animation: fadeIn 1s;
-}
-
-
-@-webkit-keyframes fadeIn {
-  from {opacity: 0;} 
-  to {opacity: 1;}
-}
-
-@keyframes fadeIn {
-  from {opacity: 0;}
-  to {opacity:1 ;}
-}
-.fa {
- 
-} */
 </style>
