@@ -19,41 +19,63 @@
             </b-col> 
          </b-row>
        </b-container> 
-      <div v-if="delete_info">
-          Click on a Grid You Want to delete. Note - You cannot Resize and Drag Grid Layouts. To Enable click 
-          <span class="cancel_delete" @click="cancel_delete">Cancel Delete</span>
-      </div>
-      <div :class={size:size}>
-        <hr style="background-color : white;">
-        <b-container>
-          <b-row >
-            <b-col cols="6">
-             <b-form inline>
-               <label for="inline-form-input-name">Enter Height :</label>
-                <span class="input_values"><b-input v-model="height" placeholder="Enter Height"></b-input></span>
-                <label for="inline-form-input-name">Enter Width :</label>
-                <span class="input_values"><b-input v-model="width" placeholder ="Enter Width"></b-input></span>
-             </b-form>  
-            </b-col>
-            <b-col>
-              <span class="select_bg">Select Background Color:
-                <span v-on:click="black_bg" class="black">
-                  <span v-if="white_tick" class="white-tick">&#10003;</span>
+      <transition name="fade">
+        <div v-if="delete_info">
+          <hr style="background-color : white;">
+          <span>Click on a Grid you want to Delete. </span>
+          <span class="note">Note - You cannot Resize and Drag Grid Layouts. To Enable click</span>
+            <b-button variant="outline-danger" class="cancel_button" @click="cancel_delete">
+              Cancel Delete
+            </b-button>
+          
+        </div>
+      </transition>
+      <transition name="fade">
+        <div v-if="size">
+          <hr style="background-color : white;">
+          <b-container>
+            <b-row >
+              <b-col cols="6">
+              <b-form inline>
+                <label for="inline-form-input-name">Enter Height :</label>
+                  <span class="input_values"><b-input v-model="height" placeholder="Enter Height"></b-input></span>
+                  <label for="inline-form-input-name">Enter Width :</label>
+                  <span class="input_values"><b-input v-model="width" placeholder ="Enter Width"></b-input></span>
+              </b-form>  
+              </b-col>
+              <b-col>
+                <span class="select_bg">Select Background Color:
+                  <span v-on:click="black_bg" class="black">
+                    <transition name="fade"><span v-if="white_tick" class="white-tick">&#10003;</span></transition>
+                  </span>
+                  <span v-on:click="white_bg" class="white" style="color:black">
+                    <transition name="fade"><span v-if="black_tick" class="black-tick">&#10003;</span></transition>
+                  </span>
                 </span>
-                <span v-on:click="white_bg" class="white" style="color:black">
-                  <span v-if="black_tick" class="black-tick">&#10003;</span>
-                </span>
-              </span>
-            </b-col>
-            <b-col cols="2">
-              <b-button variant="light"  size="lg" v-on:click="new_component_added()">Add</b-button>
-              <b-button variant="light" size="lg" v-on:click="cancel"> Cancel</b-button>
-            </b-col>
-          </b-row>  
-        </b-container>  
-     </div> 
+              </b-col>
+              <b-col cols="2">
+                <b-button variant="light"  size="lg" v-on:click="new_component_added()">Add</b-button>
+                <b-button variant="light" size="lg" v-on:click="cancel"> Cancel</b-button>
+              </b-col>
+            </b-row>  
+          </b-container>  
+        </div> 
+      </transition>
       
     </div>
+     <div>
+       <!-- Modals  -->
+    <!-- <div>
+        <b-button v-b-modal.modal-1>Launch demo modal</b-button>
+        <b-modal id="modal-1" title="BootstrapVue">
+          <p class="my-4">Hello from modal!</p>
+        </b-modal>
+    </div>
+    <div class="mb-1">
+     <b-button @click="show_delete_modal_value">Confirm Delete</b-button>
+     Return value: {{ String(delete_modal_value) }}
+    </div> -->
+  </div>
      <grid-layout
             :layout.sync="layout"
             :col-num="12"
@@ -69,7 +91,7 @@
 
             
     >
-        <span class="delete_opeartion"  @click="delete_grid($event)">
+        <span class="delete_opeartion" @click="delete_grid($event)">
         <grid-item  v-for="item in layout"
                    :x="item.x"
                    :y="item.y"
@@ -113,7 +135,7 @@ export default {
       x_coordinate : 0,
       y_coordinate : 0,
       identifier: 0,
-      size : 1,
+      size : 0,
       my_data :{name:"Anil",age : 23},
       background_color_info : 0,
       black_tick : 0,
@@ -126,6 +148,8 @@ export default {
       delete_info : 0,
       delete_operation : 0,
       delete_message: '',
+      delete_event_enable : 0,
+      delete_modal_value : '',
       layout : [
 
       ]
@@ -156,7 +180,7 @@ export default {
       this.edit = 0;
       this.new_component = 1;
       this.delete_icon = 0;
-      this.size = 1;
+      this.size = 0;
       this.height ='';
       this.width = '';
       this.delete_info = 0;
@@ -168,11 +192,12 @@ export default {
         this.layout[0].w=this.new_values;
     },
     new_component_add : function () {
-      this.size = 0;
+      this.size = 1;
       this.background_color_info = !this.background_color_info;
       this.delete_info = 0;
       this.drag = true;
       this.resize = true;
+      this.delete_event_enable = 0;
     },
     new_component_added: function () {
        if((this.height && this.width)&&(this.black_tick || this.white_tick )){
@@ -205,7 +230,7 @@ export default {
        
     },
     cancel : function () {
-      this.size = !this.size;
+      this.size = 0;
       this.height ='';
       this.width = '';
       this.background_color_info = !this.background_color_info;
@@ -221,13 +246,14 @@ export default {
       this.white_tick = 0;
     },
     delete_mode  :function () {
-      this.size = 1;
+      this.size = 0;
       this.delete_info = 1;
       this.height ='';
       this.width = '';
       this.drag = false;
       this.resize = false;
       this.delete_operation = 1;
+      this.delete_event_enable = 1;
     },
     saveData : function () {
               
@@ -237,17 +263,40 @@ export default {
 
     },
     delete_grid : function (input) {
-      console.log(input)
-      console.log(input.target.innerText)
-      alert('this grid is getting deleted')
-      this.layout.splice(input.target.innerText-1,1);
+      if(this.delete_event_enable == 1){
+        console.log(input.target.innerText)
+        alert('this grid is getting deleted')
+        this.layout.splice(input.target.innerText-1,1);
+      }
      
     },
     cancel_delete : function () {
       this.delete_info = 0;
       this.drag = true;
       this.resize = true;
-    }
+      this.delete_event_enable = 0;
+    },
+    show_delete_modal_value() {
+        this.delete_modal_value = ''
+        this.$bvModal.msgBoxConfirm('Please confirm that you want to delete grid', {
+          title: 'Please Confirm',
+          size: 'sm',
+          buttonSize: 'sm',
+          okVariant: 'danger',
+          okTitle: 'YES',
+          cancelTitle: 'NO',
+          footerClass: 'p-2',
+          hideHeaderClose: false,
+          centered: true
+        })
+          .then(value => {
+            console.log(value)
+            this.delete_modal_value= value
+          })
+          .catch(err => {
+            // An error occurred
+          })
+      }
     
   }
 }
@@ -335,11 +384,25 @@ button {
 }
 .cancel_delete {
   cursor: pointer;
-  background-color: #d9455f;
+  color : white;
 }
+/* .note {
+  background-color: #d9455f;
+  padding: 5px;
+} */
 .delete_operation {
   display: inline-block;
   height: 100%;
   width : 100%;
+}
+.cancel_button {
+  color : white;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .4s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>
