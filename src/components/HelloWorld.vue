@@ -54,8 +54,8 @@
                 </span>
               </b-col>
               <b-col cols="2">
-                <b-button variant="light"  size="lg" v-on:click="new_component_added()">Add</b-button>
-                <b-button variant="light" size="lg" v-on:click="cancel"> Cancel</b-button>
+                <b-button class="add_btn" variant="light"  size="lg" v-on:click="new_component_added()">Add</b-button>
+                <b-button class="add_btn" variant="light" size="lg" v-on:click="cancel"> Cancel</b-button>
               </b-col>
             </b-row>  
           </b-container>  
@@ -70,11 +70,24 @@
         <b-modal id="modal-1" title="BootstrapVue">
           <p class="my-4">Hello from modal!</p>
         </b-modal>
-    </div>
-    <div class="mb-1">
+    </div> -->
+    <!-- <div class="mb-1">
      <b-button @click="show_delete_modal_value">Confirm Delete</b-button>
      Return value: {{ String(delete_modal_value) }}
     </div> -->
+    <div>
+    <!-- <b-button id="show-btn" @click="showModal">Confirm Delete</b-button> -->
+    <!-- <b-button id="toggle-btn" @click="toggleModal">Toggle Modal</b-button> -->
+
+    <b-modal ref="my-modal" hide-footer title="Confirm Delete" centered: true>
+      <div class="d-block text-center">
+        <h3>Do you really want to Delete?</h3>
+      </div>
+      <b-button class="mt-3" variant="outline-danger" block @click="hideModal($event)">Delete</b-button>
+      <b-button class="mt-2" variant="outline-primary" block @click="toggleModal">Cancel</b-button>
+    </b-modal>
+  </div>
+
   </div>
      <grid-layout
             :layout.sync="layout"
@@ -150,17 +163,15 @@ export default {
       delete_message: '',
       delete_event_enable : 0,
       delete_modal_value : '',
+      selected_grid_to_delete : '',
       layout : [
 
       ]
     }
   },
   mounted(){
-    //  var vm=this;
-      // vm.w_value = 5;
-      // console.log(this.w_value)
-      // console.log(this.layout[0].w);
-      // this.layout[0].w = this.new_values[0];
+    if(this.mounte)
+    alert("hello");
   },
   methods : {
     edit_mode : function () {
@@ -263,11 +274,8 @@ export default {
 
     },
     delete_grid : function (input) {
-      if(this.delete_event_enable == 1){
-        console.log(input.target.innerText)
-        alert('this grid is getting deleted')
-        this.layout.splice(input.target.innerText-1,1);
-      }
+      if(this.delete_event_enable == 1)
+      this.showModal(input.target.innerText);
      
     },
     cancel_delete : function () {
@@ -276,8 +284,9 @@ export default {
       this.resize = true;
       this.delete_event_enable = 0;
     },
+
     show_delete_modal_value() {
-        this.delete_modal_value = ''
+        this.delete_modal_value = '';
         this.$bvModal.msgBoxConfirm('Please confirm that you want to delete grid', {
           title: 'Please Confirm',
           size: 'sm',
@@ -288,15 +297,43 @@ export default {
           footerClass: 'p-2',
           hideHeaderClose: false,
           centered: true
-        })
+        })       
           .then(value => {
-            console.log(value)
-            this.delete_modal_value= value
+            setTimeout(function(){ document.getElementsByClassName("show")[0].classList.remove("fade")}, 3000);
+            document.getElementsByClassName("show")[0].classList.remove("fade")
+            // console.log(value
+            // this.delete_modal_value= value;
           })
           .catch(err => {
-            // An error occurred
+            console.log(err)
           })
+          
+          
+        
+      
+      },
+      showModal(input) {
+        this.selected_grid_to_delete = input;
+        setTimeout(function(){ document.getElementsByClassName("show")[0].classList.remove("fade") }, 200);
+        this.$refs['my-modal'].show()
+      
+         
+      },
+      hideModal() {
+        this.$refs['my-modal'].hide()
+        console.log(this.selected_grid_to_delete)
+        // if(this.delete_event_enable == 1){
+        // console.log(input.target.innerText)
+        // alert('this grid is getting deleted')
+        this.layout.splice(this.selected_grid_to_delete-1,1);
+      // }
+      },
+      toggleModal() {
+        // We pass the ID of the button that we want to return focus to
+        // when the modal has hidden
+        this.$refs['my-modal'].toggle('#toggle-btn')
       }
+      
     
   }
 }
@@ -349,7 +386,7 @@ export default {
   z-index : 1;
   display: none;
 }
-button {
+.add_btn {
   margin-left: 10px;
   color: grey;
 }
@@ -386,7 +423,7 @@ button {
   cursor: pointer;
   color : white;
 }
-/* .note {
+/* .fade {
   background-color: #d9455f;
   padding: 5px;
 } */
@@ -398,6 +435,14 @@ button {
 .cancel_button {
   color : white;
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
+}
+.modal-dialog {
+   top : 30%;
+   -webkit-transform: translate(-50%, -50%);
+-moz-transform: translate(-50%, -50%);
+-ms-transform: translate(-50%, -50%);
+-o-transform: translate(-50%, -50%);
+transform: translate(-50%, -50%);
 }
 .fade-enter-active, .fade-leave-active {
   transition: opacity .4s;
