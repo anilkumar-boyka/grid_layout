@@ -325,7 +325,11 @@ export default {
         // if(this.delete_event_enable == 1){
         // console.log(input.target.innerText)
         // alert('this grid is getting deleted')
-        this.layout.splice(this.selected_grid_to_delete-1,1);
+        var idx = this.layout.findIndex(item => item.i == this.selected_grid_to_delete)
+        // if(this.delete_event_enable == 1){
+        // console.log(input.target.innerText)
+        // alert('this grid is getting deleted')
+        this.layout.splice(idx,1);
       // }
       },
       toggleModal() {
