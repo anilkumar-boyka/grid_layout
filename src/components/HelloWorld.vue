@@ -102,9 +102,8 @@
             :static="true"
             :maxW="10"
 
-            
     >
-        <span class="delete_opeartion" @click="delete_grid($event)">
+        
         <grid-item  v-for="item in layout"
                    :x="item.x"
                    :y="item.y"
@@ -113,9 +112,9 @@
                    :i="item.i"
                    :key="item.i"
                    @resized="resizedEvent">
-               <component :is="item.comp" :grid_no=item.i  />
+             <component :is="item.comp" :grid_no=item.i v-on:delete="delete_grid"></component>
                
-        </grid-item></span>
+        </grid-item>
     </grid-layout>
   </div>
 </template>
@@ -265,6 +264,7 @@ export default {
       this.resize = false;
       this.delete_operation = 1;
       this.delete_event_enable = 1;
+      this.open_delete_nav ='';
     },
     saveData : function () {
               
@@ -274,8 +274,10 @@ export default {
 
     },
     delete_grid : function (input) {
-      if(this.delete_event_enable == 1)
-      this.showModal(input.target.innerText);
+      // if(this.delete_event_enable == 1)
+      this.showModal(input);
+
+      console.log("rcvd grid is"+input)
      
     },
     cancel_delete : function () {
@@ -325,15 +327,17 @@ export default {
         // if(this.delete_event_enable == 1){
         // console.log(input.target.innerText)
         // alert('this grid is getting deleted')
-        this.layout = this.layout.filter(item => item.i != this.selected_grid_to_delete);
+        var idx = this.layout.findIndex(item => item.i == this.selected_grid_to_delete)
+        this.layout.splice(idx,1);
+        // this.layout.splice(this.selected_grid_to_delete-1,1);
       // }
       },
       toggleModal() {
         // We pass the ID of the button that we want to return focus to
         // when the modal has hidden
         this.$refs['my-modal'].toggle('#toggle-btn')
-      }
-      
+      },
+     
     
   }
 }
@@ -450,4 +454,6 @@ transform: translate(-50%, -50%);
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
   opacity: 0;
 }
+
+
 </style>
