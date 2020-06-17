@@ -1,16 +1,18 @@
 <template>
     <div class="white_grid">
             {{grid_no}}
+
+           <span class="delete_grid" @click="delete_grid(grid_no)">&times;</span> 
       <!-- <div class="delete">delete</div> -->
       <!-- <div>yo</div> -->
       <!-- <span id="tooltip-target-1" class="open_nav" v-b-tooltip.bottomleft.html="'<em @click=messg>hello</em>'"
   tabindex="2" variant="primary"> -->
-  <span @click="messg" :id="'tooltip-target-'+grid_no" class="open_nav"  variant="primary">
+  <!-- <span @click="messg" :id="'tooltip-target-'+grid_no" class="open_nav"  variant="primary">
         &#x2022;&#x2022;&#x2022;
         </span>
         <b-tooltip :target="'tooltip-target-'+grid_no" placement="bottomleft" triggers="hover" :id="grid_no">
             <span style="cursor:pointer; font-size:30px"  v-b-tooltip.hover.left @click="delete_grid(grid_no)">Delete</span>
-        </b-tooltip>
+        </b-tooltip> -->
       <!-- <div id="mySidenav" class="sidenav">
        <div class="closebtn" v-on:click="closeNav()">&times;</div>
         <a href="#">Delete</a>
@@ -45,9 +47,9 @@ export default {
            console.log("i is"+input)
            this.$emit('delete',input)
       },
-      closeNav :function () {
-        document.getElementById("mySidenav").style.width = "0";
-      },
+      // closeNav :function () {
+      //   document.getElementById("mySidenav").style.width = "0";
+      // },
       // messg : function () {
       //   alert('yo')
       //   this.msg = this.grid_no;
@@ -103,7 +105,7 @@ export default {
   .sidenav {padding-top: 15px;}
   .sidenav a {font-size: 18px;}
 }*/
-.open_nav {
+.delete_grid {
   font-size:large;
   float:right;
   cursor:pointer;
