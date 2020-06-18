@@ -15,7 +15,7 @@
               </span> 
             </b-col>
             <b-col>
-             <span v-if="delete_icon" v-on:click="delete_mode"><i class="fa fa-trash" aria-hidden="true"></i></span>
+             <span v-if="grid_content" v-on:click="delete_mode"><i class="fa fa-trash" aria-hidden="true"></i></span>
             </b-col> 
          </b-row>
        </b-container> 
@@ -89,7 +89,7 @@
   </div>
 
   </div>
-     <grid-layout
+      <grid-layout
             :layout.sync="layout"
             :col-num="12"
             :row-height="30"
@@ -101,9 +101,7 @@
             :use-css-transforms="true"
             :static="true"
             :maxW="10"
-
-    >
-        
+      >
         <grid-item  v-for="item in layout"
                    :x="item.x"
                    :y="item.y"
@@ -112,8 +110,7 @@
                    :i="item.i"
                    :key="item.i"
                    @resized="resizedEvent">
-             <component :is="item.comp" :grid_no=item.i v-on:delete="delete_grid"></component>
-               
+             <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid"></component>
         </grid-item>
     </grid-layout>
   </div>
@@ -163,6 +160,8 @@ export default {
       delete_event_enable : 0,
       delete_modal_value : '',
       selected_grid_to_delete : '',
+      show_delete_icon : 1,
+      grid_content : 1,
       layout : [
 
       ]
@@ -180,7 +179,7 @@ export default {
       this.defaultMode = 0;
       this.edit = 1;
       this.new_component = 0;
-      this.delete_icon = 1;
+      this.show_delete_icon = 1;
     },
     default_mode : function () {
       alert('You Switched to Default')
@@ -194,12 +193,13 @@ export default {
       this.height ='';
       this.width = '';
       this.delete_info = 0;
+      this.show_delete_icon = 0;
     },
     resizedEvent: function(i, newH, newW, newHPx, newWPx){
         console.log("RESIZED i=" + i + ", H=" + newH + ", W=" + newW + ", H(px)=" + newHPx + ", W(px)=" + newWPx);
-        this.new_values[0]=newW;
-        console.log('new w resize i'+this.new_values)
-        this.layout[0].w=this.new_values;
+        // this.new_values[0]=newW;
+        // console.log('new w resize i'+this.new_values)
+        // this.layout[0].w=this.new_values;
     },
     new_component_add : function () {
       this.size = 1;
@@ -274,11 +274,8 @@ export default {
 
     },
     delete_grid : function (input) {
-      // if(this.delete_event_enable == 1)
       this.showModal(input);
-
       console.log("rcvd grid is"+input)
-     
     },
     cancel_delete : function () {
       this.delete_info = 0;
@@ -309,10 +306,6 @@ export default {
           .catch(err => {
             console.log(err)
           })
-          
-          
-        
-      
       },
       showModal(input) {
         this.selected_grid_to_delete = input;
