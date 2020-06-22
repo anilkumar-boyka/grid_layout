@@ -2,20 +2,29 @@
     <div class="white_grid">
             {{grid_no}}
           <span v-if="delete_icon">
-           <span class="delete_grid" @click="delete_grid(grid_no)">&times;</span> 
+             <span class="delete_grid" @click="delete_grid(grid_no)">&times;</span> 
+          </span>
+          <span v-for="content in contents">
+            <component :is="content"></component>
           </span>
     </div>
 </template>
 
 <script>
+import imageContent from '@/components/imageContent'
+import textContent from '@/components/textContent'
 export default {
+     components : {
+        imageContent:imageContent,
+        textContent:textContent,
+    },
     name: "White",
-    props: ["grid_no","delete_icon"],
+    props: ["grid_no","delete_icon","grid_content"],
     data () {
         return {
             color_code : '',
             msg : '',
-            tipData: { title: 'Tooltip <span v-on:click="messg()">Message</span>' },
+            contents : []
         }
     },
     methods : {
@@ -24,6 +33,10 @@ export default {
            console.log("i is"+input)
            this.$emit('delete',input)
         },
+    },
+    mounted(){
+        console.log(this.grid_content);
+        this.contents.push(this.grid_content)
     }
 }
 </script>

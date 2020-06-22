@@ -15,11 +15,16 @@
               </span> 
             </b-col>
             <b-col>
-             <span v-if="grid_content" v-on:click="delete_mode"><i class="fa fa-trash" aria-hidden="true"></i></span>
+              <span>Select Grid Content :</span>
+              <select v-model="selected" class="radio_btn">
+                <option v-for="option in options" v-bind:value="option.value">
+                  {{ option.text }}
+                </option>
+              </select><span>Selected: {{ selected }}</span>
             </b-col> 
          </b-row>
        </b-container> 
-      <transition name="fade">
+      <!-- <transition name="fade">
         <div v-if="delete_info">
           <hr style="background-color : white;">
           <span>Click on a Grid you want to Delete. </span>
@@ -29,7 +34,7 @@
             </b-button>
           
         </div>
-      </transition>
+      </transition> -->
       <transition name="fade">
         <div v-if="size">
           <hr style="background-color : white;">
@@ -110,7 +115,7 @@
                    :i="item.i"
                    :key="item.i"
                    @resized="resizedEvent">
-             <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid"></component>
+             <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid" :grid_content ="selected"></component>
         </grid-item>
     </grid-layout>
   </div>
@@ -164,7 +169,12 @@ export default {
       grid_content : 1,
       layout : [
 
-      ]
+      ],
+      selected: 'imageContent',
+      options: [
+      { text: 'Image', value: 'imageContent' },
+      { text: 'Text', value: 'textContent' },
+    ]
     }
   },
   mounted(){
@@ -446,6 +456,10 @@ transform: translate(-50%, -50%);
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
   opacity: 0;
+}
+.radio_btn {
+  background-color: black;
+  color:blanchedalmond
 }
 
 
