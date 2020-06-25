@@ -1,6 +1,6 @@
 <template>
-    <div class="white_grid">
-            {{grid_no}}
+    <div >
+          <div>{{grid_no}}</div>
           <span v-if="delete_icon">
              <span class="delete_grid" @click="delete_grid(grid_no)">&times;</span> 
           </span>

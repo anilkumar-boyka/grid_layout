@@ -9,19 +9,19 @@
          <b-row>
            <b-col>
               <span class="add">
-                <span :class={new_component:new_component} v-on:click="new_component_add()">
+                <span :class={new_component:new_component} v-b-modal.open v-on:click="new_component_add()">
                   Add New Grid Component
                 </span>
               </span> 
             </b-col>
-            <b-col>
+            <!-- <b-col>
               <span>Select Grid Content :</span>
               <select v-model="selected" class="radio_btn">
                 <option v-for="option in options" v-bind:value="option.value">
                   {{ option.text }}
                 </option>
               </select><span>Selected: {{ selected }}</span>
-            </b-col> 
+            </b-col>  -->
          </b-row>
        </b-container> 
       <!-- <transition name="fade">
@@ -35,7 +35,7 @@
           
         </div>
       </transition> -->
-      <transition name="fade">
+      <!-- <transition name="fade">
         <div v-if="size">
           <hr style="background-color : white;">
           <b-container>
@@ -65,10 +65,9 @@
             </b-row>  
           </b-container>  
         </div> 
-      </transition>
+      </transition> -->
       
-    </div>
-     <div>
+    </div> 
        <!-- Modals  -->
     <!-- <div>
         <b-button v-b-modal.modal-1>Launch demo modal</b-button>
@@ -81,9 +80,6 @@
      Return value: {{ String(delete_modal_value) }}
     </div> -->
     <div>
-    <!-- <b-button id="show-btn" @click="showModal">Confirm Delete</b-button> -->
-    <!-- <b-button id="toggle-btn" @click="toggleModal">Toggle Modal</b-button> -->
-
     <b-modal ref="my-modal" hide-footer title="Confirm Delete" centered: true>
       <div class="d-block text-center">
         <h3>Do you really want to Delete?</h3>
@@ -92,8 +88,54 @@
       <b-button class="mt-2" variant="outline-primary" block @click="toggleModal">Cancel</b-button>
     </b-modal>
   </div>
+  <!-- new -->
+  <!-- <div>
+    <b-button v-b-modal.open>Open Modal</b-button>
 
-  </div>
+    <div class="mt-3">
+      Submitted Names:
+      <div v-if="submittedNames.length === 0">--</div>
+      <ul v-else class="mb-0 pl-3">
+        <li v-for="name in submittedNames">{{ name }}</li>
+      </ul>
+    </div>
+  </div> -->
+  <b-modal
+      id="open"
+      ref="modal"
+      title="Select Grid height,width and content"
+      @show="resetModal"
+      @hidden="resetModal"
+      @ok="handleOk"
+    >
+    <form ref="form" @submit.stop.prevent="handleSubmit">
+      <b-form inline>
+        <label class="sr-only" for="inline-form-input-height">Username</label>
+        <b-input
+        label="yo"
+      id="inline-form-input-height"
+      class="mb-2 mr-sm-2 mb-sm-0"
+      placeholder="Enter Height"
+      v-model="height"
+    ></b-input>
+    <b-input
+      id="inline-form-input-width"
+      class="mb-2 mr-sm-2 mb-sm-0"
+      placeholder="Enter Width"
+      v-model="width"
+    ></b-input>
+<!-- <select v-model="selected" class="radio_btn">
+                <option v-for="option in options" v-bind:value="option.value">
+                  {{ option.text }}
+                </option>
+              </select><span>Selected: {{ selected }}</span> -->
+              <b-form-select v-model="selected" :options="options" size="lg">{{}}
+              </b-form-select>
+
+      </b-form>
+    </form>
+    <div v-if="modal_warning" class="text-danger" style="font-size: 14px;padding-top:3px;"> Please set height,width and grid content!</div>
+    </b-modal>
       <grid-layout
             :layout.sync="layout"
             :col-num="12"
@@ -107,7 +149,7 @@
             :static="true"
             :maxW="10"
       >
-        <grid-item  v-for="item in layout"
+        <grid-item class="grid" v-for="item in layout"
                    :x="item.x"
                    :y="item.y"
                    :w="item.w"
@@ -115,7 +157,8 @@
                    :i="item.i"
                    :key="item.i"
                    @resized="resizedEvent">
-             <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid" :grid_content ="selected"></component>
+             <!-- <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid" :grid_content ="selected"></component> -->
+             <component :is="item.content" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid"></component>       
         </grid-item>
     </grid-layout>
   </div>
@@ -123,16 +166,20 @@
 
 <script>
 import VueGridLayout from 'vue-grid-layout'
-import White from '@/components/White'
-import Black from '@/components/Black'
+// import White from '@/components/White'
+// import Black from '@/components/Black'
+import imageContent from '@/components/imageContent'
+import textContent from '@/components/textContent'
 export default {
   name: 'HelloWorld',
   components: {
             // ResponsiveGridLayout,
             GridLayout:VueGridLayout.GridLayout,
             GridItem: VueGridLayout.GridItem,
-            White : White,
-            Black : Black
+            // White : White,
+            // Black : Black,
+            imageContent:imageContent,
+            textContent:textContent,
         },
   data () {
     return {
@@ -170,11 +217,17 @@ export default {
       layout : [
 
       ],
-      selected: 'imageContent',
+      selected: 'null',
       options: [
-      { text: 'Image', value: 'imageContent' },
-      { text: 'Text', value: 'textContent' },
-    ]
+        { value: null, text: 'Select grid content ' },
+        { text: 'Image', value: 'imageContent' },
+        { text: 'Text', value: 'textContent' },
+      ],
+      name: '',
+        nameState: null,
+        submittedNames: [],
+        modal_warning : 0,
+
     }
   },
   mounted(){
@@ -212,6 +265,7 @@ export default {
         // this.layout[0].w=this.new_values;
     },
     new_component_add : function () {
+      setTimeout(function(){ document.getElementsByClassName("show")[0].classList.remove("fade") }, 200);
       this.size = 1;
       this.background_color_info = !this.background_color_info;
       this.delete_info = 0;
@@ -225,7 +279,7 @@ export default {
        this.width = parseInt(this.width, 10);
        this.height = parseInt(this.height, 10);
        if(this.black_tick)
-        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":White}
+        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"content":White}
        else
         this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":Black}
       this.layout.push(this.x);
@@ -340,6 +394,45 @@ export default {
         // when the modal has hidden
         this.$refs['my-modal'].toggle('#toggle-btn')
       },
+      checkFormValidity() {
+        const valid = this.$refs.form.checkValidity()
+        this.nameState = valid
+        return valid
+      },
+      resetModal() {
+        // alert('reset modal')
+      },
+      handleOk(bvModalEvt) {
+      if(this.height && this.width && this.selected)  
+      {
+        this.identifier++;
+        this.width = parseInt(this.width, 10);
+        this.height = parseInt(this.height, 10);
+        if(this.selected =='imageContent')
+        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"content":imageContent}
+        else if(this.selected =='textContent')
+        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"content":textContent}
+        this.layout.push(this.x);
+        this.height ='';
+        this.width = '';
+        if(this.x_coordinate/5>0 && this.x_coordinate%5==0)
+            {
+              this.y_coordinate = this.y_coordinate+3;
+              this.x_coordinate = 0;
+            }
+            else{
+                
+                this.x_coordinate = this.x_coordinate+2;
+            }
+            this.modal_warning = 0;
+      }
+      // this.handleSubmit()
+      else {
+        this.modal_warning =1;
+        // if(this.modal_warning)
+        bvModalEvt.preventDefault()
+      }
+      },
      
     
   }
@@ -443,6 +536,9 @@ export default {
   color : white;
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
 }
+.grid {
+ background-color: black;
+}
 .modal-dialog {
    top : 30%;
    -webkit-transform: translate(-50%, -50%);
@@ -461,6 +557,8 @@ transform: translate(-50%, -50%);
   background-color: black;
   color:blanchedalmond
 }
-
+.btn-primary{
+  font-size: 20px;
+}
 
 </style>
