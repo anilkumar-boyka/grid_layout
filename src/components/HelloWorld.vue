@@ -129,12 +129,29 @@
                   {{ option.text }}
                 </option>
               </select><span>Selected: {{ selected }}</span> -->
-              <b-form-select v-model="selected" :options="options" size="lg">{{}}
+              <b-form-select v-model="selected" :options="options" size="lg">
               </b-form-select>
 
       </b-form>
-    </form>
-    <div v-if="modal_warning" class="text-danger" style="font-size: 14px;padding-top:3px;"> Please set height,width and grid content!</div>
+      </form>
+      <b-form v-if="selected!==null" class="mt-3">
+        <label class="url" v-if="selected=='imageContent'">Enter Image Url : </label>
+        <label class="url" v-else-if="selected=='textContent'">Enter Text :</label>
+      <b-form-group
+        id="input-group-1"
+        label-for="input-1"
+      >
+        <b-form-input
+        class="w-50 p-3"
+          id="input-1"
+          v-model="grid_content_input"
+          type="text"
+          placeholder="Enter here"
+          required
+        ></b-form-input>
+      </b-form-group>
+      </b-form>
+    <div v-if="modal_warning" class="text-danger" style="font-size: 14px;padding-top:3px;"> Please set all input fields!</div>
     </b-modal>
       <grid-layout
             :layout.sync="layout"
@@ -158,7 +175,7 @@
                    :key="item.i"
                    @resized="resizedEvent">
              <!-- <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid" :grid_content ="selected"></component> -->
-             <component :is="item.content" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid"></component>       
+             <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid" :grid_content="item.grid_content"></component>       
         </grid-item>
     </grid-layout>
   </div>
@@ -217,7 +234,7 @@ export default {
       layout : [
 
       ],
-      selected: 'null',
+      selected: null,
       options: [
         { value: null, text: 'Select grid content ' },
         { text: 'Image', value: 'imageContent' },
@@ -227,8 +244,8 @@ export default {
         nameState: null,
         submittedNames: [],
         modal_warning : 0,
-
-    }
+        grid_content_input :'',
+  }
   },
   mounted(){
     if(this.mounte)
@@ -273,36 +290,36 @@ export default {
       this.resize = true;
       this.delete_event_enable = 0;
     },
-    new_component_added: function () {
-       if((this.height && this.width)&&(this.black_tick || this.white_tick )){
-       this.identifier++;
-       this.width = parseInt(this.width, 10);
-       this.height = parseInt(this.height, 10);
-       if(this.black_tick)
-        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"content":White}
-       else
-        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":Black}
-      this.layout.push(this.x);
-       this.height ='';
-       this.width = '';
-       }
-       else {
-         alert('Set Height,Width and Background Color')
-       }
-       if(this.x_coordinate/5>0 && this.x_coordinate%5==0)
-          {
-            this.y_coordinate = this.y_coordinate+3;
-            this.x_coordinate = 0;
-          }
-          else{
+    // new_component_added: function () {
+    //    if((this.height && this.width)&&(this.black_tick || this.white_tick )){
+    //    this.identifier++;
+    //    this.width = parseInt(this.width, 10);
+    //    this.height = parseInt(this.height, 10);
+    //    if(this.black_tick)
+    //     this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"content":White,}
+    //    else
+    //     this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":Black}
+    //   this.layout.push(this.x);
+    //    this.height ='';
+    //    this.width = '';
+    //    }
+    //    else {
+    //      alert('Set Height,Width and Background Color')
+    //    }
+    //    if(this.x_coordinate/5>0 && this.x_coordinate%5==0)
+    //       {
+    //         this.y_coordinate = this.y_coordinate+3;
+    //         this.x_coordinate = 0;
+    //       }
+    //       else{
               
-               this.x_coordinate = this.x_coordinate+2;
-          }
-          this.white_tick = 0;
-          this.black_tick = 0;
-        console.log(this.layout)
+    //            this.x_coordinate = this.x_coordinate+2;
+    //       }
+    //       this.white_tick = 0;
+    //       this.black_tick = 0;
+    //     console.log(this.layout)
        
-    },
+    // },
     cancel : function () {
       this.size = 0;
       this.height ='';
@@ -403,15 +420,15 @@ export default {
         // alert('reset modal')
       },
       handleOk(bvModalEvt) {
-      if(this.height && this.width && this.selected)  
+      if(this.height && this.width && this.selected &&this.grid_content_input)  
       {
         this.identifier++;
         this.width = parseInt(this.width, 10);
         this.height = parseInt(this.height, 10);
         if(this.selected =='imageContent')
-        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"content":imageContent}
+        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":imageContent,"grid_content":this.grid_content_input}
         else if(this.selected =='textContent')
-        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"content":textContent}
+        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":textContent,"grid_content":this.grid_content_input}
         this.layout.push(this.x);
         this.height ='';
         this.width = '';
@@ -425,6 +442,7 @@ export default {
                 this.x_coordinate = this.x_coordinate+2;
             }
             this.modal_warning = 0;
+            this.grid_content_input ='';
       }
       // this.handleSubmit()
       else {
@@ -560,5 +578,7 @@ transform: translate(-50%, -50%);
 .btn-primary{
   font-size: 20px;
 }
-
+.url {
+  font-size: larger;
+}
 </style>
