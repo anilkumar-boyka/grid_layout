@@ -175,7 +175,7 @@
                    :key="item.i"
                    @resized="resizedEvent">
              <!-- <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid" :grid_content ="selected"></component> -->
-             <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid" :grid_content="item.grid_content"></component>       
+             <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid" :grid_content="item.grid_content" :height="item.resize" ref="imageContent"></component>       
         </grid-item>
     </grid-layout>
   </div>
@@ -245,6 +245,7 @@ export default {
         submittedNames: [],
         modal_warning : 0,
         grid_content_input :'',
+        resized_height : ''
   }
   },
   mounted(){
@@ -277,9 +278,10 @@ export default {
     },
     resizedEvent: function(i, newH, newW, newHPx, newWPx){
         console.log("RESIZED i=" + i + ", H=" + newH + ", W=" + newW + ", H(px)=" + newHPx + ", W(px)=" + newWPx);
-        // this.new_values[0]=newW;
-        // console.log('new w resize i'+this.new_values)
-        // this.layout[0].w=this.new_values;
+        this.resized_height = newHPx;
+        // console.log(this.resized_height);
+        // this.$emit('resize', 7);
+        console.log(this.$refs.imageContent);
     },
     new_component_add : function () {
       setTimeout(function(){ document.getElementsByClassName("show")[0].classList.remove("fade") }, 200);
@@ -426,7 +428,7 @@ export default {
         this.width = parseInt(this.width, 10);
         this.height = parseInt(this.height, 10);
         if(this.selected =='imageContent')
-        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":imageContent,"grid_content":this.grid_content_input}
+        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":imageContent,"grid_content":this.grid_content_input,"resize" : this.resized_height}
         else if(this.selected =='textContent')
         this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":textContent,"grid_content":this.grid_content_input}
         this.layout.push(this.x);
