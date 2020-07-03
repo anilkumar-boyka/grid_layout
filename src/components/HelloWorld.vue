@@ -134,7 +134,7 @@
 
       </b-form>
       </form>
-      <b-form v-if="selected!==null" class="mt-3">
+      <!-- <b-form v-if="selected!==null" class="mt-3">
         <label class="url" v-if="selected=='imageContent'">Enter Image Url : </label>
         <label class="url" v-else-if="selected=='textContent'">Enter Text :</label>
       <b-form-group
@@ -150,7 +150,9 @@
           required
         ></b-form-input>
       </b-form-group>
-      </b-form>
+      </b-form> -->
+      <b-form-select v-model="selected_dataset" :options="dataset_options" size="lg" class="mt-3">
+              </b-form-select>
     <div v-if="modal_warning" class="text-danger" style="font-size: 14px;padding-top:3px;"> Please set all input fields!</div>
     </b-modal>
       <grid-layout
@@ -175,7 +177,7 @@
                    :key="item.i"
                    @resized="resizedEvent">
              <!-- <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid" :grid_content ="selected"></component> -->
-             <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid" :grid_content="item.grid_content" :height="item.resize" ref="imageContent"></component>       
+             <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid" :grid_content="item.grid_content" :dataset="item.dataset" ref="imageContent"></component>       
         </grid-item>
     </grid-layout>
   </div>
@@ -185,8 +187,11 @@
 import VueGridLayout from 'vue-grid-layout'
 // import White from '@/components/White'
 // import Black from '@/components/Black'
-import imageContent from '@/components/imageContent'
-import textContent from '@/components/textContent'
+// import imageContent from '@/components/imageContent'
+// import textContent from '@/components/textContent'
+import barChart from '@/components/barChart.vue'
+import pieChart from '@/components/pieChart.vue'
+
 export default {
   name: 'HelloWorld',
   components: {
@@ -195,8 +200,10 @@ export default {
             GridItem: VueGridLayout.GridItem,
             // White : White,
             // Black : Black,
-            imageContent:imageContent,
-            textContent:textContent,
+            // imageContent:imageContent,
+            // textContent:textContent,
+            pieChart : pieChart,
+            barChart : barChart
         },
   data () {
     return {
@@ -236,9 +243,15 @@ export default {
       ],
       selected: null,
       options: [
-        { value: null, text: 'Select grid content ' },
-        { text: 'Image', value: 'imageContent' },
-        { text: 'Text', value: 'textContent' },
+        { value: null, text: 'Select Chart Component' },
+        { text: 'Bar Chart', value: 'barChart' },
+        { text: 'Pie Chart', value: 'pieChart' },
+      ],
+      selected_dataset : null,
+      dataset_options: [
+        { text: 'Select Dataset',value: null, },
+        { text: 'Dataset 1', value: 'sen' },
+        { text: 'Dataset 2', value: 'ten' },
       ],
       name: '',
         nameState: null,
@@ -422,15 +435,15 @@ export default {
         // alert('reset modal')
       },
       handleOk(bvModalEvt) {
-      if(this.height && this.width && this.selected &&this.grid_content_input)  
+      if(this.height && this.width && this.selected &&this.selected_dataset)  
       {
         this.identifier++;
         this.width = parseInt(this.width, 10);
         this.height = parseInt(this.height, 10);
-        if(this.selected =='imageContent')
-        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":imageContent,"grid_content":this.grid_content_input,"resize" : this.resized_height}
-        else if(this.selected =='textContent')
-        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":textContent,"grid_content":this.grid_content_input}
+        if(this.selected =='barChart')
+        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":barChart,"grid_content":this.grid_content_input,"dataset":this.selected_dataset,"resize" : this.resized_height}
+        else if(this.selected =='pieChart')
+        this.x={"x":this.x_coordinate,"y":this.y_coordinate,"w":this.width,"h":this.height,"i":this.identifier,"comp":pieChart,"grid_content":this.grid_content_input,"dataset":this.selected_dataset}
         this.layout.push(this.x);
         this.height ='';
         this.width = '';
