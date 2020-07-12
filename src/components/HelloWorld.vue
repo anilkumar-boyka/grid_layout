@@ -158,26 +158,26 @@
       <grid-layout
             :layout.sync="layout"
             :col-num="12"
-            :row-height="30"
+            :row-height="20"
             :is-draggable=drag
             :is-resizable=resize
             :is-mirrored="false"
-            :vertical-compact="true"
-            :margin="[10, 10]"
-            :use-css-transforms="true"
-            :static="true"
-            :maxW="10"
+            :prevent-collision="true"
+            
+           
       >
-        <grid-item class="grid" v-for="item in layout"
+        <grid-item class="grid" v-for="item in layout" ref="grid_height" :id="item.i"
                    :x="item.x"
                    :y="item.y"
                    :w="item.w"
                    :h="item.h"
                    :i="item.i"
                    :key="item.i"
-                   @resized="resizedEvent">
+                   @resized="resizedEvent"
+                   @container-resized="containerResizedEvent"
+                   @layout-updated="layoutUpdatedEvent">
              <!-- <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid" :grid_content ="selected"></component> -->
-             <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid" :grid_content="item.grid_content" :dataset="item.dataset" ref="imageContent"></component>       
+             <component :is="item.comp" :grid_no=item.i :delete_icon="show_delete_icon" v-on:delete="delete_grid" :grid_content="item.grid_content" :dataset="item.dataset" ref="charts"></component>       
         </grid-item>
     </grid-layout>
   </div>
@@ -191,6 +191,7 @@ import VueGridLayout from 'vue-grid-layout'
 // import textContent from '@/components/textContent'
 import barChart from '@/components/barChart.vue'
 import pieChart from '@/components/pieChart.vue'
+import grid from "./grid"
 
 export default {
   name: 'HelloWorld',
@@ -258,7 +259,14 @@ export default {
         submittedNames: [],
         modal_warning : 0,
         grid_content_input :'',
-        resized_height : ''
+        resized_height : '',
+        windowHeight: null,
+        windowWidth: null,
+        g_height : 1,
+        set_grid_width : null,
+        idi :1,
+        min_h:10,
+        min_w : 6
   }
   },
   mounted(){
@@ -291,10 +299,26 @@ export default {
     },
     resizedEvent: function(i, newH, newW, newHPx, newWPx){
         console.log("RESIZED i=" + i + ", H=" + newH + ", W=" + newW + ", H(px)=" + newHPx + ", W(px)=" + newWPx);
-        this.resized_height = newHPx;
+        // this.resized_height = newHPx;
         // console.log(this.resized_height);
         // this.$emit('resize', 7);
-        console.log(this.$refs.imageContent);
+        // console.log(this.$refs.imageContent.yo);
+        // if(newH < 6 || newW  <4)
+        // {
+        //   newHPx = 470;
+        //   newW = 4; 
+        // }
+          //  console.log(this.$refs.charts[0].yo);
+           this.$refs.charts[i-1].yo(newWPx,newHPx);
+          //  this.g_height=newWPx/10-6;
+           console.log("gh is"+this.g_height)
+           console.log("i is"+i)
+           //set vue grid-item height according to width
+           document.getElementById("1").style.height ="300px";
+          //  x=newW+"px"
+          //  console.log(x)
+           document.getElementById("1").style.backgroundColor ="blue"; 
+
     },
     new_component_add : function () {
       setTimeout(function(){ document.getElementsByClassName("show")[0].classList.remove("fade") }, 200);
@@ -363,7 +387,7 @@ export default {
       this.open_delete_nav ='';
     },
     saveData : function () {
-              
+              alert("yo")
         //        const data = JSON.stringify(this.my_data)
         // window.localStorage.setItem('my_data', data);
         // console.log(JSON.parse(window.localStorage.getItem('my_data')))
@@ -437,6 +461,17 @@ export default {
       handleOk(bvModalEvt) {
       if(this.height && this.width && this.selected &&this.selected_dataset)  
       {
+        //to set initialize height and width value
+          
+        // if(this.height < 10 || this.width  <6)
+        // {
+        //   this.height = 10;
+        //   this.width = 6; 
+        // } 
+        // else{
+        //   this.height=this.height+1;
+        // }
+    
         this.identifier++;
         this.width = parseInt(this.width, 10);
         this.height = parseInt(this.height, 10);
@@ -458,6 +493,7 @@ export default {
             }
             this.modal_warning = 0;
             this.grid_content_input ='';
+            // console.log(this.$refs.grid_height[0].$el.clientWidth)
       }
       // this.handleSubmit()
       else {
@@ -466,9 +502,41 @@ export default {
         bvModalEvt.preventDefault()
       }
       },
+      containerResizedEvent: function(i, newH, newW, newHPx, newWPx){
+        console.log("CONTAINER RESIZED i=" + i + ", H=" + newH + ", W=" + newW + ", H(px)=" + newHPx + ", W(px)=" + newWPx);
+          // this.g_height=newW+3;
+      },
+      layoutUpdatedEvent: function(newLayout){
+      console.log("Updated layout: ", newLayout)
+    },
+      myEventHandler(e) {
+        // console.log(e.currentTarget.innerHeight)
+        // console.log(e.currentTarget.innerWidth)
+        // this.windowHeight = e.currentTarget.innerHeight-65;
+        // this.windowWidth = e.currentTarget.innerWidth;
+        console.log(this.$refs.grid_height[0].$el.clientWidth)
+        console.log(this.$refs.grid_height)
+  }
      
     
-  }
+  },
+  created() {
+    // console.log(window.innerHeight);
+    // console.log(this.ref.grid_height)
+    // this.windowHeight = window.innerHeight-65;
+    // this.windowWidth = window.innerWidth;
+  window.addEventListener("resize", this.myEventHandler);
+  // alert('hello')
+  },
+  destroyed() {
+    window.removeEventListener("resize", this.myEventHandler);
+  },
+  // computed: {
+  //           rowHeight() {
+  //               return ((this.windowHeight-this.numberOfRows*10-10) / this.numberOfRows); 
+  //           },
+          
+  //       },
 }
 </script>
 
@@ -596,4 +664,17 @@ transform: translate(-50%, -50%);
 .url {
   font-size: larger;
 }
+
 </style>
+
+
+
+
+
+//  :vertical-compact="true"
+//             :margin="[10, 10]"
+//             :use-css-transforms="true"
+//             :static="true"
+//             :maxW="10"
+//             :is-responsive ="true"
+//             :cols="{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }"

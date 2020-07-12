@@ -1,6 +1,9 @@
 <template>
 
     <div class="myChart">
+      <span v-if="delete_icon">
+        <span class="delete_grid" @click="delete_grid(grid_no)">&times;</span> 
+      </span>
         <Chart :chart-data="datacollection"></Chart>
     </div>
 </template>
@@ -78,13 +81,20 @@ export default {
                 
             
         },
+        delete_grid : function(input) {
+          console.log(input);
+          this.$emit('delete',input)
+        }
         }
     }
 
 
 </script>
 <style scoped>
-.mychart {
-  background-color:azure;
-}
+.delete_grid {
+  font-size:large;
+  float:right;
+  cursor:pointer;
+  margin-right: 10px;
+} 
 </style>

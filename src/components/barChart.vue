@@ -1,11 +1,15 @@
 <template>
-
-    <div class="myChart">
-        <Chart :chart-data="datacollection"></Chart>
+<!-- v-bind:style="{height: height+'px' }" -->
+    <div class="my_chart">
+      <span v-if="delete_icon">
+        <span class="delete_grid" @click="delete_grid(grid_no)">&times;</span>
+      </span>
+        <Chart  :chart-data="datacollection"></Chart>
     </div>
 </template>
 
 <script>
+// v-bind:style="{ height : 190+ 'px' }"
 import Chart from "./barChart-config.js";
 export default {
     components: {
@@ -15,7 +19,8 @@ export default {
       data() {
         return {
             datacollection: null,
-            mydata : null
+            mydata : null,
+            height: 390
         };
     },
     mounted(){
@@ -82,13 +87,40 @@ export default {
                 
             
         },
-        }
+        delete_grid : function(input) {
+          console.log(input);
+          this.$emit('delete',input)
+        }, 
+        yo : function (width,height) {
+          // console.log(i)
+          // this.height= height-10;
+          // console.log(this.height)
+          console.log("w and h is"+width+height)
+          this.height = height;
+        } ,
+        },
+        computed: {
+         myStyles () {
+             return {
+                 height: "2000px",
+                position: 'relative'
+              }
+           }
+         }
     }
 
 
 </script>
 <style scoped>
-.mychart {
-  background-color:azure;
-}
+.delete_grid {
+  font-size:large;
+  float:right;
+  cursor:pointer;
+  margin-right: 10px;
+} 
+/* .my_chart {
+  position: relative;
+  height: 100%;
+  width: 100%;
+} */
 </style>

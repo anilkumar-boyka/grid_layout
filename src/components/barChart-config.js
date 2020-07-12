@@ -39,10 +39,10 @@ export default {
                 legend: {
                     display: true
                 },
-                responsive: true,
+                responsive: false,
                 lineTension:1,
                 maintainAspectRatio:false,
-                aspectRatio:2
+                // aspectRatio:2
             }
         }
     },
